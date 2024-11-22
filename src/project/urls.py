@@ -31,6 +31,13 @@ urlpatterns += [
     path('redoc/', schema_view.with_ui('redoc', cache_timeout=0), name='schema-redoc'),
 ]
 
+# auth app
+
+urlpatterns += [
+    path(r'auth/', include('djoser.urls')),
+    path(r'auth/', include('djoser.urls.jwt')),
+]
+
 # local apps urls.
 
 urlpatterns += [

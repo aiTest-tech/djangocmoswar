@@ -7,6 +7,7 @@ from rest_framework import status
 from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
 from .models import AudioRecord
+from rest_framework.permissions import IsAuthenticated
 from .serializers import AudioRecordSerializer
 
 # External API settings
@@ -24,6 +25,11 @@ process_audio_body = openapi.Schema(
     }
 )
 
+class HelloView(APIView):
+    permission_classes = [IsAuthenticated]
+    def get(self, requeset, *args, **kwargs):
+        return Response({"hii":"hello"}, status=status.HTTP_200_OK)
+
 class ProcessAudioView(APIView):
     @swagger_auto_schema(request_body=process_audio_body, responses={200: AudioRecordSerializer})
     def post(self, request):
@@ -31,13 +37,13 @@ class ProcessAudioView(APIView):
             return Response({"error": "No file part in the request"}, status=status.HTTP_400_BAD_REQUEST)
 
         file = request.FILES['file']
+        print(file)
 
-        if file.filename == '':
-            return Response({"error": "No selected file"}, status=status.HTTP_400_BAD_REQUEST)
 
         try:
             # Encode the file to base64
             audio_base64 = base64.b64encode(file.read()).decode('utf-8')
+            # print(audio_base64)
 
             # Prepare the payload for the external API
             payload = {
@@ -71,7 +77,7 @@ class ProcessAudioView(APIView):
 
                 # Create an AudioRecord and save to DB
                 audio_record = AudioRecord.objects.create(
-                    audio_base64=audio_base64,
+                    audio_file = file,
                     source=source
                 )
 
